@@ -1,17 +1,3 @@
-# Fetch latest Ubuntu 22.04 AMI automatically
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-  owners = ["099720109477"]
-}
-
 # 1. VPC using variable
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -109,9 +95,9 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = true
 }
 
-# 8. EC2 Instance using variable instance_type
+# 8. EC2 Instance using variable ami_id and instance_type
 resource "aws_instance" "web" {
-  ami                    = data.aws_ami.ubuntu.id
+  ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
