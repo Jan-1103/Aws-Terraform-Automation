@@ -1,84 +1,69 @@
-# 1. VPC
+# Fetch latest Ubuntu 22.04 AMI automatically
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+  owners = ["099720109477"]
+}
+
+# 1. VPC using variable
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name        = "project-vpc"
-    Environment = var.environment
-  }
+  tags = { Name = "${var.environment}-vpc" }
 }
 
 # 2. Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "project-igw"
-  }
+  tags = { Name = "${var.environment}-igw" }
 }
 
-# 3. Public Subnet 1
+# 3. Two Public Subnets using variables
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_1_cidr
-  availability_zone       = "ap-south-1a"
+  cidr_block              = var.subnet_1_cidr
+  availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
-
-  tags = {
-    Name        = "public-subnet-1"
-    Environment = var.environment
-  }
+  tags = { Name = "${var.environment}-subnet-1" }
 }
 
-# 4. Public Subnet 2
 resource "aws_subnet" "public_2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_2_cidr
-  availability_zone       = "ap-south-1b"
+  cidr_block              = var.subnet_2_cidr
+  availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
-
-  tags = {
-    Name        = "public-subnet-2"
-    Environment = var.environment
-  }
+  tags = { Name = "${var.environment}-subnet-2" }
 }
 
-# 5. Route Table
+# 4. Route Table & Associations
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
-
-  tags = {
-    Name = "public-route-table"
-  }
+  tags = { Name = "${var.environment}-route-table" }
 }
 
-# 6. Route Table Association - Subnet 1
-resource "aws_route_table_association" "public_1" {
+resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.public_1.id
   route_table_id = aws_route_table.public.id
 }
 
-# 7. Route Table Association - Subnet 2
-resource "aws_route_table_association" "public_2" {
-  subnet_id      = aws_subnet.public_2.id
-  route_table_id = aws_route_table.public.id
-}
-
-# 8. Security Group
+# 5. Security Group
 resource "aws_security_group" "web_sg" {
-  name        = "terraform-web-sg"
-  description = "Allow SSH and HTTP"
+  name        = "${var.environment}-web-sg"
+  description = "Allow HTTP and SSH"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -86,7 +71,6 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
-    description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -101,52 +85,43 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-# 9. IAM Role
+# 6. IAM Role & Instance Profile
 resource "aws_iam_role" "ec2_role" {
-  name = "terraform-ec2-s3-role"
-
+  name = "${var.environment}-ec2-s3-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
+      Principal = { Service = "ec2.amazonaws.com" }
     }]
   })
 }
 
-# 10. IAM Instance Profile
 resource "aws_iam_instance_profile" "profile" {
-  name = "terraform-ec2-profile"
+  name = "${var.environment}-ec2-profile"
   role = aws_iam_role.ec2_role.name
 }
 
-# 11. S3 Bucket
+# 7. S3 Bucket
 resource "aws_s3_bucket" "bucket" {
-  bucket        = "janani-terraform-project-2026-1008"
+  bucket        = "janani-unique-terraform-bucket-2026-var"
   force_destroy = true
 }
 
-# 12. EC2 Instance
+# 8. EC2 Instance using variable instance_type
 resource "aws_instance" "web" {
-  ami                    = var.ami_id
+  ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.profile.name
 
-  tags = {
-    Name        = "terraform-web-server"
-    Environment = var.environment
-  }
+  tags = { Name = "${var.environment}-web-server" }
 }
 
-# 13. Elastic IP
+# 9. Elastic IP
 resource "aws_eip" "web_eip" {
-  domain   = "vpc"
   instance = aws_instance.web.id
+  domain   = "vpc"
 }
