@@ -72,8 +72,8 @@ resource "aws_security_group" "web_sg" {
 }
 
 # 6. IAM Role & Instance Profile
-resource ""terraform-ec2-s3-role" {
-  name = "${var.environment}-ec2-s3-role"
+resource "aws_iam_role" "ec2_role" {
+  name = "project03-ec2-s3-role-2026"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -85,7 +85,7 @@ resource ""terraform-ec2-s3-role" {
 }
 
 resource "aws_iam_instance_profile" "profile" {
-  name = "${var.environment}-ec2-profile"
+  name = "project03-ec2-profile-2026"
   role = aws_iam_role.ec2_role.name
 }
 
