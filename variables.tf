@@ -1,33 +1,35 @@
 variable "aws_region" {
-  type    = string
-  default = "eu-north-1"
+  description = "AWS Region for deployment"
+  type        = string
+  default     = "eu-north-1"
 }
 
 variable "environment" {
-  type    = string
-  default = "production"
+  description = "Environment name (e.g., dev, prod)"
+  type        = string
+  default     = "dev"
 }
 
 variable "vpc_cidr" {
-  type    = string
-  default = "10.0.0.0/16"
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"
 }
 
-variable "subnet_1_cidr" {
-  type    = string
-  default = "10.0.1.0/24"
+variable "subnet_cidr" {
+  description = "CIDR block for the Subnet"
+  type        = string
+  default     = "10.0.1.0/24"
 }
 
-variable "subnet_2_cidr" {
-  type    = string
-  default = "10.0.2.0/24"
+variable "instance_type" {
+  description = "EC2 Instance type"
+  type        = string
+  default     = "t3.micro" # t3.micro is great for eu-north-1
 }
 
 variable "ami_id" {
-  type    = string
-  default = "ami-08ec94f928e214f2d"
-}
-variable "ami_id" {
-  type    = string
-  default = "ami-08ec94f928e214f2d"
+  description = "AMI ID for the EC2 instance in eu-north-1 (Ubuntu 22.04 LTS)"
+  type        = string
+  default     = "ami-0989fb15ce71ba39e" # Valid Ubuntu 22.04 AMI for eu-north-1
 }
