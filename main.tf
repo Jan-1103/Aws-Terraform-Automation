@@ -72,7 +72,7 @@ resource "aws_security_group" "web_sg" {
 }
 
 # 6. IAM Role & Instance Profile
-resource "aws_iam_role" "ec2_role" {
+resource ""terraform-ec2-s3-role" {
   name = "${var.environment}-ec2-s3-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -91,7 +91,7 @@ resource "aws_iam_instance_profile" "profile" {
 
 # 7. S3 Bucket
 resource "aws_s3_bucket" "bucket" {
-  bucket        = "janani-unique-terraform-bucket-2026-var"
+  bucket        = "janani-project03-storage-2026-unique"
   force_destroy = true
 }
 
