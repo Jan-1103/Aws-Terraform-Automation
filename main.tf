@@ -73,7 +73,7 @@ resource "aws_security_group" "web_sg" {
 
 # 6. IAM Role & Instance Profile
 resource "aws_iam_role" "ec2_role" {
-  name = "project03-ec2-s3-role-2026-v2"  # <-- Updated here
+  name = "project03-ec2-s3-role-2026-v3"  # <-- Updated here
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -90,7 +90,7 @@ resource "aws_iam_instance_profile" "profile" {
 }
 # 7. S3 Bucket
 resource "aws_s3_bucket" "bucket" {
-  bucket        = "janani-project03-storage-2026-v2"  # <-- Updated here
+  bucket = "janani-project03-storage-2026-v3"  # <-- Updated here
   force_destroy = true
 }
 # 8. EC2 Instance using variable ami_id and instance_type
