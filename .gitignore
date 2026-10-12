@@ -11,3 +11,7 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+
+# Keep Terraform variable values and state backups private
+*.tfvars
+terraform-state-backup.json
