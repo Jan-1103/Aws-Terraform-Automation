@@ -85,7 +85,7 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 resource "aws_iam_instance_profile" "profile" {
-  name = "project03-ec2-profile-2026-v2" # <-- Updated here too
+  name = "project03-ec2-profile-2026-v3" # <-- Updated here to
   role = aws_iam_role.ec2_role.name
 }
 # 7. S3 Bucket
