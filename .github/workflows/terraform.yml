@@ -1,4 +1,3 @@
-
 name: Terraform CI-CD
 
 on:
@@ -96,8 +95,10 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: Terraform Outputs
-        run: terraform output
+      - name: Display Terraform Outputs
+        run: |
+          echo "=== INFRASTRUCTURE DEPLOYMENT OUTPUTS ==="
+          terraform output
 
       - name: Infrastructure Validation
         run: |
